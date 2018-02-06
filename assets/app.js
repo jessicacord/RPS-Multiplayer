@@ -25,7 +25,7 @@ $("#submit").on("click", function() {
         event.preventDefault();
 
         if ( player1 === null) {
-
+            
             var newPlayerName = $("#player-name").val().trim();
             player1 = {
                 name: newPlayerName,
@@ -37,9 +37,7 @@ $("#submit").on("click", function() {
             
             database.ref("/players/player1").set(player1);
 
-            if ( player1 !== null && player2 !== null) {
-                database.ref("/turn").set(1);
-            }
+            
 
             $("#name-input").html("Welcome " + player1.name);
 
@@ -56,7 +54,6 @@ $("#submit").on("click", function() {
             //Delete player when user closes tab
             database.ref("/players/player1").onDisconnect().remove();
             database.ref("/turn").onDisconnect().remove();
-
             
     
         } else if ( player2 === null) {
@@ -69,13 +66,6 @@ $("#submit").on("click", function() {
                 turn: false,
                 choice: ""
             }
-            
-            database.ref("/players/player2").set(player2);
-
-            if ( player1 !== null && player2 !== null) {
-                database.ref("/turn").set(1);
-            }
-
             $("#name-input").html("Welcome " + player2.name);
             
             $("#player-2-box").append($("<h4>").attr("id","player2-choice"));
@@ -84,6 +74,11 @@ $("#submit").on("click", function() {
             
             //Create chat
             $("#chat").append($("<form>").append($("<input>").attr("id", "player-2-message").attr("placeholder", "Enter a message").attr("type", "text")).append($("<button>").attr("id", "chat-submit-2").text("Send")));
+            
+            database.ref("/players/player2").set(player2);
+
+
+            
 
             //Delete player when user closes tab
             database.ref("/players/player2").onDisconnect().remove();
@@ -91,6 +86,10 @@ $("#submit").on("click", function() {
 
         } else if ( player1 !== null && player2 !== null) {
             alert("The game is currently full. Try again later");
+        }
+
+        if ( player1 !== null && player2 !== null) {
+            database.ref("/turn").set(1);
         }
     
 })
@@ -152,6 +151,7 @@ database.ref("/turn").on("value", function(snap){
 
         database.ref("/players/player1/turn").set(true);
 
+        
         var rock = $("<div>").html($("<a>").attr("class", "rps").attr("data-rps", "rock").text("Rock"));
         var paper = $("<div>").html($("<a>").attr("class", "rps").attr("data-rps", "paper").text("Paper"));
         var scissors = $("<div>").html($("<a>").attr("class", "rps").attr("data-rps", "scissors").text("Scissors"));
@@ -267,6 +267,11 @@ var winner = function() {
             player2.losses += 1;
         }
     }
+
+    database.ref("/players/").set({
+        player1: player1,
+        player2: player2
+    });
     
 }
 

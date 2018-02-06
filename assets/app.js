@@ -298,6 +298,8 @@ var reset = function() {
 database.ref("/message/").on("value", function(snap){
     
     $("#chat-box").append($("<p>").text(snap.val()));
+
+    database.ref("/message/").set("");
 })
 
 

@@ -1,4 +1,5 @@
 #chat-box {
     border: 1px solid black;
     height: 15rem;
+    overflow: scroll;
 }

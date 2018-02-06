@@ -45,15 +45,15 @@ $("#submit").on("click", function() {
 
             $("#player-2-box").append($("<h4>").attr("id","player1-opp-choice"));
 
-            //Create chat
-            $("#chat").append($("<form>").append($("<input>").attr("id", "player-1-message").attr("placeholder", "Enter a message").attr("type", "text")).append($("<button>").attr("id", "chat-submit-1").text("Send")));
+            $("#chat-form").append($("<input>").attr("type", "hidden").attr("value", player1.name).addClass("player-message"));
 
-            $("#chat-submit-1").on("click", player1chat);
+            
             
 
             //Delete player when user closes tab
             database.ref("/players/player1").onDisconnect().remove();
             database.ref("/turn").onDisconnect().remove();
+            database.ref("/message/").onDisconnect().set(player1.name + " has disconnected");
             
     
         } else if ( player2 === null) {
@@ -72,8 +72,7 @@ $("#submit").on("click", function() {
 
             $("#player-1-box").append($("<h4>").attr("id","player2-opp-choice"));
             
-            //Create chat
-            $("#chat").append($("<form>").append($("<input>").attr("id", "player-2-message").attr("placeholder", "Enter a message").attr("type", "text")).append($("<button>").attr("id", "chat-submit-2").text("Send")));
+            $("#chat-form").append($("<input>").attr("type", "hidden").attr("value", player2.name).addClass("player-message"));
             
             database.ref("/players/player2").set(player2);
 
@@ -83,6 +82,7 @@ $("#submit").on("click", function() {
             //Delete player when user closes tab
             database.ref("/players/player2").onDisconnect().remove();
             database.ref("/turn").onDisconnect().remove();
+            database.ref("/message/").onDisconnect().set(player2.name + " has disconnected");
 
         } else if ( player1 !== null && player2 !== null) {
             alert("The game is currently full. Try again later");
@@ -90,6 +90,7 @@ $("#submit").on("click", function() {
 
         if ( player1 !== null && player2 !== null) {
             database.ref("/turn").set(1);
+            database.ref("/message").set("");
         }
     
 })
@@ -204,6 +205,7 @@ database.ref("/turn").on("value", function(snap){
         }
     })
 
+    //Show choices of each player, determine winner, increase win/loss count
     if ( turn === 3 ) {
         winner();
         $("#player1-opp-choice").html(player2.choice);
@@ -292,22 +294,31 @@ var reset = function() {
 }
 
 
+//Messages listener
+database.ref("/message/").on("value", function(snap){
+    
+    $("#chat-box").append($("<p>").text(snap.val()));
+})
 
 
 
-//Show choices of each player, determine winner, increase win/loss count
+
 
 //Create chat functionality
 //Take users message input and displays in chat screen with player name and message
 
-var player1chat = function() {
+$("#send-chat").on("click", function() {
     
     event.preventDefault();
 
-    console.log("Player 1 message");
+    if (player1 && player2){
+        var message = $("#chat-message").val();
+        var playerMessage = $(".player-message").val();
+        
+        database.ref("/message/").set(playerMessage + ": " + message);
+    }
 
-    var player1message = $("#player-1-message").val();
+    $("#chat-message").val("");
+    database.ref("/message/").set("");
     
-    $("#chat-box").append($("<p>").text(player1message));
-    $("#player-1-message").val("");
-}
+})
